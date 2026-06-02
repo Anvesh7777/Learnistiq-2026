@@ -1,0 +1,18 @@
+# Node modules (VERY important)
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment variables (never upload sensitive data!)
+.env
+
+
+
+# Log files
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+

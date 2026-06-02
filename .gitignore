@@ -1,0 +1,36 @@
+# dependencies
+node_modules
+
+# production
+dist
+build
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# env
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# uploads/temp
+tmp
+temp
+
+# vite
+.vite
+
+# coverage
+coverage
+
+# cache
+.cache
