@@ -5,6 +5,8 @@ import crypto from "crypto";
 import PDFDocument from "pdfkit";
 import { User } from "../models/user.model.js";
 import { Course } from "../models/course.model.js";
+import QRCode from "qrcode";
+import { Certificate } from "../models/certificate.model.js";
 
 export const markLectureComplete =
   async (req, res) => {
@@ -223,6 +225,36 @@ export const downloadCertificate =
         });
       }
 
+      // Create / Reuse Certificate
+
+      let certificate =
+        await Certificate.findOne({
+          userId,
+          courseId,
+        });
+
+      if (!certificate) {
+        certificate =
+          await Certificate.create({
+            userId,
+            courseId,
+            certificateNumber:
+              progress.certificateId ||
+              `LSTQ-${Math.random()
+                .toString(16)
+                .substring(2, 10)
+                .toUpperCase()}`,
+          });
+      }
+
+      const verificationUrl =
+        `${process.env.FRONTEND_URL}/verify/${certificate.certificateNumber}`;
+
+      const qrCodeDataUrl =
+        await QRCode.toDataURL(
+          verificationUrl
+        );
+
       const studentName =
         `${user.firstName} ${user.lastName}`.trim();
 
@@ -263,12 +295,13 @@ export const downloadCertificate =
 
       // Background
 
-      doc.rect(
-        0,
-        0,
-        pageWidth,
-        pageHeight
-      )
+      doc
+        .rect(
+          0,
+          0,
+          pageWidth,
+          pageHeight
+        )
         .fill("#FFFFFF");
 
       // Outer Border
@@ -352,8 +385,6 @@ export const downloadCertificate =
           }
         );
 
-      // Student Name
-
       doc
         .fillColor("#493D9E")
         .fontSize(34)
@@ -376,8 +407,6 @@ export const downloadCertificate =
           }
         );
 
-      // Course Name
-
       doc
         .fillColor("#000000")
         .fontSize(28)
@@ -388,8 +417,6 @@ export const downloadCertificate =
               "center",
           }
         );
-
-      // Instructor
 
       doc.moveDown(1.5);
 
@@ -403,8 +430,6 @@ export const downloadCertificate =
               "center",
           }
         );
-
-      // Date
 
       doc.text(
         `Completion Date: ${completionDate}`,
@@ -439,12 +464,77 @@ export const downloadCertificate =
         .fillColor("#000000")
         .fontSize(14)
         .text(
-          `Certificate ID: ${progress.certificateId}`,
+          `Certificate ID: ${certificate.certificateNumber}`,
           boxX,
           452,
           {
             width:
               boxWidth,
+            align:
+              "center",
+          }
+        );
+
+      // VERIFIED Seal
+
+      doc
+        .circle(
+          pageWidth - 140,
+          460,
+          42
+        )
+        .fillAndStroke(
+          "#493D9E",
+          "#493D9E"
+        );
+
+      doc
+        .fillColor("#FFFFFF")
+        .fontSize(11)
+        .text(
+          "VERIFIED",
+          pageWidth - 175,
+          450,
+          {
+            width: 70,
+            align:
+              "center",
+          }
+        );
+
+      doc
+        .fontSize(8)
+        .text(
+          "LEARNISTIQ",
+          pageWidth - 175,
+          465,
+          {
+            width: 70,
+            align:
+              "center",
+          }
+        );
+
+      // QR Code
+
+      doc.image(
+        qrCodeDataUrl,
+        pageWidth - 170,
+        300,
+        {
+          width: 100,
+        }
+      );
+
+      doc
+        .fillColor("#000000")
+        .fontSize(9)
+        .text(
+          "Scan to Verify",
+          pageWidth - 185,
+          405,
+          {
+            width: 130,
             align:
               "center",
           }
@@ -519,7 +609,7 @@ export const downloadCertificate =
           "Error generating certificate",
       });
     }
-    };
+  };
   
     export const verifyCertificate =
   async (req, res) => {
