@@ -55,34 +55,75 @@ export const createCourse =async (req,res)=>{
     }
 };
 
-export const updateCourse=async(req,res) => {
-    const adminId=req.adminId;
-    const {courseId}=req.params;
-    const { title, description, price, image } = req.body;
-    try{
-       const courseSearch=await Course.findById(courseId);
-       if(!courseSearch) {
-        return res.status(404).json({ errors: "Course not found" });
-       } 
-       const course=await Course.updateOne({
-        _id:courseId,
-        creatorId: adminId,
-       },
-       {
-         title,
-         description,
-         price,
-         instructor,
-         image: {
-            public_id: image?.public_id, 
-            url: image?.url,
-         }
-       })
-       res.status(201).json({ message: "Course updaes Successfully",course});
-    } catch (error) {
-        res.status(500).json({errors: "Error in course updating"});
-        console.log("Error in course updating",error);
-    } 
+export const updateCourse = async (
+  req,
+  res
+) => {
+  const adminId = req.adminId;
+  const { courseId } = req.params;
+
+  const {
+    title,
+    description,
+    price,
+    instructor,
+    image,
+  } = req.body;
+
+  try {
+    const courseSearch =
+      await Course.findById(
+        courseId
+      );
+
+    if (!courseSearch) {
+      return res.status(404).json({
+        errors:
+          "Course not found",
+      });
+    }
+
+    const updateData = {
+      title,
+      description,
+      price,
+      instructor,
+    };
+
+    if (image) {
+      updateData.image = {
+        public_id:
+          image.public_id,
+        url: image.url,
+      };
+    }
+
+    const course =
+      await Course.updateOne(
+        {
+          _id: courseId,
+          creatorId: adminId,
+        },
+        updateData
+      );
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Course updated successfully",
+      course,
+    });
+  } catch (error) {
+    console.log(
+      "Error in course updating:",
+      error
+    );
+
+    return res.status(500).json({
+      errors:
+        "Error in course updating",
+    });
+  }
 };
 
 
