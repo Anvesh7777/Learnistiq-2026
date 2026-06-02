@@ -60,9 +60,18 @@ const Dashboard = () => {
   const fetchDashboardData =
     async () => {
       try {
-        const response =
+         const admin = JSON.parse(
+  localStorage.getItem("admin")
+);
+
+const response =
   await api.get(
-    "/analytics"
+    "/analytics",
+    {
+      headers: {
+        Authorization: `Bearer ${admin?.token}`,
+      },
+    }
   );
 
         setAnalytics(
