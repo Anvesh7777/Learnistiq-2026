@@ -19,6 +19,70 @@ import api from "../api/axios";
 import Navbar from "./common/Navbar";
 import Footer from "./common/Footer";
 
+const downloadCertificate =
+  async (courseId) => {
+    try {
+      const user =
+        JSON.parse(
+          localStorage.getItem(
+            "user"
+          )
+        );
+
+      const response =
+        await fetch(
+          `${import.meta.env.VITE_API_URL}/progress/certificate/${courseId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          "Failed to download certificate"
+        );
+      }
+
+      const blob =
+        await response.blob();
+
+      const url =
+        window.URL.createObjectURL(
+          blob
+        );
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.href = url;
+
+      link.download =
+        "certificate.pdf";
+
+      document.body.appendChild(
+        link
+      );
+
+      link.click();
+
+      link.remove();
+
+      window.URL.revokeObjectURL(
+        url
+      );
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Certificate download failed"
+      );
+    }
+  };
+
 const Purchases = () => {
   const navigate =
     useNavigate();
@@ -215,14 +279,16 @@ const Purchases = () => {
       ✓ Course Completed
     </div>
 
-    <a
-      href={`${import.meta.env.VITE_API_URL}/progress/certificate/${course._id}`}
-      target="_blank"
-      rel="noreferrer"
-      className="w-full mt-3 inline-block text-center bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium transition"
-    >
-      Download Certificate
-    </a>
+   <button
+  onClick={() =>
+    downloadCertificate(
+      course._id
+    )
+  }
+  className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-medium transition"
+>
+  Download Certificate
+</button>
   </>
 )}
 
