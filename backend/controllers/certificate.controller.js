@@ -212,7 +212,7 @@ export const downloadCertificate =
         );
         
         const verificationUrl =
-  `${process.env.FRONTEND_URL}/verify/${progress.certificateId}`;
+`${process.env.FRONTEND_URL}/verify/${certificate.certificateNumber}`;
 
 doc
   .fillColor("#493D9E")
@@ -237,6 +237,63 @@ doc
         success: false,
         message:
           "Error downloading certificate",
+      });
+    }
+  };
+
+  export const verifyCertificate =
+  async (req, res) => {
+    try {
+      const { certificateId } =
+        req.params;
+
+      const certificate =
+        await Certificate.findOne({
+          certificateNumber:
+            certificateId,
+        });
+
+      if (!certificate) {
+        return res.status(404).json({
+          success: false,
+          message:
+            "Certificate not found",
+        });
+      }
+
+      const user =
+        await User.findById(
+          certificate.userId
+        );
+
+      const course =
+        await Course.findById(
+          certificate.courseId
+        );
+
+      return res.status(200).json({
+        success: true,
+        certificate: {
+          certificateNumber:
+            certificate.certificateNumber,
+          studentName:
+            `${user.firstName} ${user.lastName}`,
+          courseName:
+            course.title,
+          issuedAt:
+            certificate.issuedAt,
+        },
+      });
+    } catch (error) {
+      console.log(
+        "Certificate verification error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Error verifying certificate",
       });
     }
   };
