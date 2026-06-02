@@ -6,6 +6,10 @@ import {
   downloadCertificate,
 } from "../controllers/certificate.controller.js";
 
+import {
+  verifyCertificate,
+} from "../controllers/certificate.controller.js";
+
 const router = express.Router();
 
 router.get(
@@ -18,6 +22,11 @@ router.get(
   "/download/:courseId",
   userMiddleware,
   downloadCertificate
+);
+
+router.get(
+  "/verify/:certificateId",
+  verifyCertificate
 );
 
 export default router;
