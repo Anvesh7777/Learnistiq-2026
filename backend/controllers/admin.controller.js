@@ -54,15 +54,23 @@ export const login = async (req, res) => {
    }
 };
 
-export const logout=(req, res) => {
-   try {
-    if(!req.cookies.jwt){
-        return res.status(401).json({ errors: "Kindly login first" });
+export const logout =
+  async (req, res) => {
+    try {
+      res.clearCookie(
+        "jwt"
+      );
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "Logged out successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        errors:
+          "Error in logout",
+      });
     }
-    res.clearCookie("jwt");
-    res.status(200).json({ message: "Logged out successfully" });
-   } catch (error) {
-     res.status(500).json({ errors: "Error in logout" });
-     console.log("Error in logout", error);
-   }
-};
+  };
