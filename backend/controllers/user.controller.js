@@ -133,19 +133,31 @@ export const login = async (req, res) => {
     }
 };
 
-export const logout=(req, res) => {
+export const logout = async (
+  req,
+  res
+) => {
   try {
-   if(!req.cookies.jwt){
-       return res.status(401).json({ errors: "Kindly login first" });
-   }
-   res.clearCookie("jwt");
-   res.status(200).json({ message: "Logged out successfully" });
+    res.clearCookie("jwt");
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Logged out successfully",
+    });
   } catch (error) {
-    res.status(500).json({ errors: "Error in logout" });
-    console.log("Error in logout", error);
+    console.log(
+      "Logout error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      errors:
+        "Error in logout",
+    });
   }
 };
-
 
 export const getUserPurchases = async (req, res) => {
   try {
@@ -284,8 +296,9 @@ export const forgotPassword =
 
       await user.save();
 
-      const resetUrl =
-        `http://localhost:5173/reset-password/${resetToken}`;
+      const resetUrl =  
+`${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        
 
      await sendEmail(
   user.email,

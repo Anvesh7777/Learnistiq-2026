@@ -1,4 +1,5 @@
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const api = axios.create({
   baseURL:
@@ -54,6 +55,45 @@ api.interceptors.request.use(
   },
   (error) =>
     Promise.reject(error)
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status =
+      error?.response?.status;
+
+    const code =
+      error?.response?.data
+        ?.code;
+
+    if (
+      status === 401 &&
+      (code ===
+        "TOKEN_EXPIRED" ||
+        code ===
+          "INVALID_TOKEN")
+    ) {
+      localStorage.removeItem(
+        "user"
+      );
+
+      localStorage.removeItem(
+        "admin"
+      );
+
+      toast.error(
+        "Session expired. Please login again."
+      );
+
+      window.location.href =
+        "/login";
+    }
+
+    return Promise.reject(
+      error
+    );
+  }
 );
 
 export default api;
