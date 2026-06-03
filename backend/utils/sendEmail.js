@@ -16,14 +16,24 @@ console.log(
 const transporter =
   nodemailer.createTransport({
     host: "smtp.gmail.com",
+
     port: 587,
+
     secure: false,
+
+    requireTLS: true,
 
     auth: {
       user:
         process.env.EMAIL_USER,
+
       pass:
         process.env.EMAIL_PASS,
+    },
+
+    tls: {
+      rejectUnauthorized:
+        false,
     },
 
     connectionTimeout:
@@ -36,6 +46,21 @@ const transporter =
       30000,
   });
 
+transporter.verify(
+  (error, success) => {
+    if (error) {
+      console.log(
+        "SMTP connection error:",
+        error.message
+      );
+    } else {
+      console.log(
+        "SMTP server is ready"
+      );
+    }
+  }
+);
+
 export const sendEmail =
   async (
     to,
@@ -43,16 +68,25 @@ export const sendEmail =
     html
   ) => {
     try {
-      await transporter.sendMail({
-        from: `"Learnistiq" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html,
-      });
+      const info =
+        await transporter.sendMail(
+          {
+            from: `"Learnistiq" <${process.env.EMAIL_USER}>`,
+
+            to,
+
+            subject,
+
+            html,
+          }
+        );
 
       console.log(
-        `Email sent to ${to}`
+        "Email sent:",
+        info.messageId
       );
+
+      return info;
     } catch (error) {
       console.log(
         "Email sending error:",
